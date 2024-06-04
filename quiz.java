@@ -2,6 +2,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -10,9 +12,12 @@ import javax.swing.*;
 
 public class quiz extends JPanel implements ActionListener{
     Timer timer;
-    static String url = "jdbc:mysql://localhost:3306/sqlquiz";
+    static String url = "jdbc:mysql://localhost:3306/sqlquiz?zeroDateTimeBehavior=CONVERT_TO_NULL";
     static String username = "root";
     static String password = "maplestory";
+    static Connection con1;
+    static PreparedStatement createStatement;
+    static Statement sql;
     static String[] questions = new String[2];
     static String[] answers = new String[2];
     static int currquestion = 0;
@@ -73,7 +78,22 @@ public class quiz extends JPanel implements ActionListener{
             return "Unknown"; // Default to empty string if the dialog is cancelled
         }
     }
-    public static void drawEndScreen(){
+    public static void drawEndScreen(Graphics graphics){
+        try{
+            ResultSet allBoardEntries = sql.executeQuery("Select * from scores order by score desc;");
+        
+            graphics.setColor(Color.black);
+            graphics.setFont(new Font("Sans serif", Font.ROMAN_BASELINE, 20));
+            System.out.println("\nLEADERBOARD:");
+            while(allBoardEntries.next()) {
+                String name = allBoardEntries.getString("name");
+                int score = allBoardEntries.getInt("score");
+                System.out.printf("%-15s%-5d\n", name, score);
+            }
+
+        }catch(SQLException ex){
+
+        }
         
     }
     public quiz(){
@@ -122,7 +142,6 @@ public class quiz extends JPanel implements ActionListener{
         @Override
         public void keyPressed(KeyEvent e) {
             //Handle key pressed events for hte cursor
-            System.out.println(e.getKeyCode());
             switch (e.getKeyCode()) {
 
                 case KeyEvent.VK_ENTER:
@@ -132,16 +151,25 @@ public class quiz extends JPanel implements ActionListener{
                     answer.requestFocusInWindow();
                     
                     if (response.equals(answers[currquestion])){
-                        score++;
+                        score+=1;
                             
                     }
-                        currquestion++;
-                    
+                    currquestion+=1;
+                    System.out.println(currquestion);
                     if(currquestion >= answers.length){
-                        Class.forName("com.mysql.cj.jdbc.Driver");
-                        dbConnect = DriverManager.getConnection(DB_URL, Username, Password);
-                        sqlSt = dbConnect.createStatement();
+                        try{
+                            
+                            Class.forName("com.mysql.cj.jdbc.Driver");
+                            con1 = DriverManager.getConnection(url, username, password);
+                            sql = con1.createStatement();
+                            String string = "INSERT INTO scores (ID,name,score) VALUES('"+1+"','"+name+"','"+score+"')";
+                            createStatement = con1.prepareStatement(string);
+                            createStatement.executeUpdate();
+                        }catch(ClassNotFoundException | SQLException ex){
+
+                        }
                         
+
                     }
                     
                     break;

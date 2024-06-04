@@ -6,18 +6,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
+import java.sql.*;
 import javax.swing.*;
-
 
 public class quiz extends JPanel implements ActionListener{
     Timer timer;
-    static String url = "jdbc:mysql://localhost:3306/sqlquiz?zeroDateTimeBehavior=CONVERT_TO_NULL";
-    static String username = "root";
-    static String password = "maplestory";
     static Connection con1;
-    static PreparedStatement createStatement;
-    static Statement sql;
+    static PreparedStatement insert;
+    static String connectURL = "jdbc:mysql://127.0.0.1:3306/sqlquiz";
+    static String user = "root";
+    static String Password = "maplestory";
     static String[] questions = new String[2];
     static String[] answers = new String[2];
     static int currquestion = 0;
@@ -79,25 +77,31 @@ public class quiz extends JPanel implements ActionListener{
         }
     }
     public static void drawEndScreen(Graphics graphics){
-        try{
-            ResultSet allBoardEntries = sql.executeQuery("Select * from scores order by score desc;");
+        // try{
+        //     ResultSet allBoardEntries = sql.executeQuery("Select * from scores order by score desc;");
         
-            graphics.setColor(Color.black);
-            graphics.setFont(new Font("Sans serif", Font.ROMAN_BASELINE, 20));
-            System.out.println("\nLEADERBOARD:");
-            while(allBoardEntries.next()) {
-                String name = allBoardEntries.getString("name");
-                int score = allBoardEntries.getInt("score");
-                System.out.printf("%-15s%-5d\n", name, score);
-            }
+        //     graphics.setColor(Color.black);
+        //     graphics.setFont(new Font("Sans serif", Font.ROMAN_BASELINE, 20));
+        //     System.out.println("\nLEADERBOARD:");
+        //     while(allBoardEntries.next()) {
+        //         String name = allBoardEntries.getString("name");
+        //         int score = allBoardEntries.getInt("score");
+        //         System.out.printf("%-15s%-5d\n", name, score);
+        //     }
 
-        }catch(SQLException ex){
+        // }catch(SQLException ex){
 
-        }
+        // }
         
     }
     public quiz(){
+        try{
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con1 = DriverManager.getConnection(connectURL, user,Password );
+            
+        }catch(ClassNotFoundException|SQLException ex){}
         name = nameString();
+        System.out.println(con1);
         this.selectDifficulty();
 
         this.setPreferredSize(new Dimension(500,500));
@@ -157,15 +161,14 @@ public class quiz extends JPanel implements ActionListener{
                     currquestion+=1;
                     System.out.println(currquestion);
                     if(currquestion >= answers.length){
+                        
                         try{
-                            
                             Class.forName("com.mysql.cj.jdbc.Driver");
-                            con1 = DriverManager.getConnection(url, username, password);
-                            sql = con1.createStatement();
-                            String string = "INSERT INTO scores (ID,name,score) VALUES('"+1+"','"+name+"','"+score+"')";
-                            createStatement = con1.prepareStatement(string);
-                            createStatement.executeUpdate();
-                        }catch(ClassNotFoundException | SQLException ex){
+                            con1 = DriverManager.getConnection(connectURL, user,Password );
+                            insert = con1.prepareStatement("INSERT INTO scores(studentName,mobile,course)values('"+1+"','"+name+"','"+score+"')");
+                            insert.execute();
+
+                        }catch(ClassNotFoundException|SQLException ex){
 
                         }
                         

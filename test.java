@@ -7,7 +7,7 @@ public class test extends JFrame{
         this.add(panel);
 		this.setTitle("SQL quiz");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setResizable(true);
+		this.setResizable(false);
 		this.pack();
 		this.setVisible(true);
 		this.setLocationRelativeTo(null);
